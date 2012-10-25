@@ -10,9 +10,18 @@
 // mysql_select_db("DB_Name_Here") or die (mysql_error());
 //////////////  QUERY THE MEMBER DATA INITIALLY LIKE YOU NORMALLY WOULD
 // $sql = mysql_query("SELECT id, firstname, country FROM myTable ORDER BY id ASC");
+if (!$_GET['id']) {
+	die("id parameter is null!");
+}
+$id = htmlspecialchars($_GET['id']);
+
+if (!$_GET['title']) {
+	die("title parameter is null!");
+}
+$title = htmlspecialchars($_GET['title']);
 $dir = "sqlite:xxtebook.db";
 $dbh  = new PDO($dir) or die("cannot open the database");
-$query =  "SELECT count(*) from Article";
+$query =  "SELECT count(*) from Article where seasonId = '" . $id . "'";
 //////////////////////////////////// Adam's Pagination Logic ////////////////////////////////////////////////////////////////////////
 foreach ($dbh->query($query) as $row) {
 $nr = (int)$row[0];
@@ -43,27 +52,27 @@ $add1 = $pn + 1;
 $add2 = $pn + 2;
 if ($pn == 1) {
     $centerPages .= '&nbsp; <span class="pagNumActive">' . $pn . '</span> &nbsp;';
-    $centerPages .= '&nbsp; <a href="' . $_SERVER['PHP_SELF'] . '?pn=' . $add1 . '">' . $add1 . '</a> &nbsp;';
+    $centerPages .= '&nbsp; <a href="' . $_SERVER['PHP_SELF'] . '?pn=' . $add1 . '&id='. $id . '&title='. $title . '">' . $add1 . '</a> &nbsp;';
 } else if ($pn == $lastPage) {
-    $centerPages .= '&nbsp; <a href="' . $_SERVER['PHP_SELF'] . '?pn=' . $sub1 . '">' . $sub1 . '</a> &nbsp;';
+    $centerPages .= '&nbsp; <a href="' . $_SERVER['PHP_SELF'] . '?pn=' . $sub1 . '&id='. $id . '&title='. $title . '">' . $sub1 . '</a> &nbsp;';
     $centerPages .= '&nbsp; <span class="pagNumActive">' . $pn . '</span> &nbsp;';
 } else if ($pn > 2 && $pn < ($lastPage - 1)) {
-    $centerPages .= '&nbsp; <a href="' . $_SERVER['PHP_SELF'] . '?pn=' . $sub2 . '">' . $sub2 . '</a> &nbsp;';
-    $centerPages .= '&nbsp; <a href="' . $_SERVER['PHP_SELF'] . '?pn=' . $sub1 . '">' . $sub1 . '</a> &nbsp;';
+    $centerPages .= '&nbsp; <a href="' . $_SERVER['PHP_SELF'] . '?pn=' . $sub2 . '&id='. $id . '&title='. $title . '">' . $sub2 . '</a> &nbsp;';
+    $centerPages .= '&nbsp; <a href="' . $_SERVER['PHP_SELF'] . '?pn=' . $sub1 . '&id='. $id . '&title='. $title . '">' . $sub1 . '</a> &nbsp;';
     $centerPages .= '&nbsp; <span class="pagNumActive">' . $pn . '</span> &nbsp;';
-    $centerPages .= '&nbsp; <a href="' . $_SERVER['PHP_SELF'] . '?pn=' . $add1 . '">' . $add1 . '</a> &nbsp;';
-    $centerPages .= '&nbsp; <a href="' . $_SERVER['PHP_SELF'] . '?pn=' . $add2 . '">' . $add2 . '</a> &nbsp;';
+    $centerPages .= '&nbsp; <a href="' . $_SERVER['PHP_SELF'] . '?pn=' . $add1 . '&id='. $id . '&title='. $title . '">' . $add1 . '</a> &nbsp;';
+    $centerPages .= '&nbsp; <a href="' . $_SERVER['PHP_SELF'] . '?pn=' . $add2 . '&id='. $id . '&title='. $title . '">' . $add2 . '</a> &nbsp;';
 } else if ($pn > 1 && $pn < $lastPage) {
-    $centerPages .= '&nbsp; <a href="' . $_SERVER['PHP_SELF'] . '?pn=' . $sub1 . '">' . $sub1 . '</a> &nbsp;';
+    $centerPages .= '&nbsp; <a href="' . $_SERVER['PHP_SELF'] . '?pn=' . $sub1 . '&id='. $id . '&title='. $title . '">' . $sub1 . '</a> &nbsp;';
     $centerPages .= '&nbsp; <span class="pagNumActive">' . $pn . '</span> &nbsp;';
-    $centerPages .= '&nbsp; <a href="' . $_SERVER['PHP_SELF'] . '?pn=' . $add1 . '">' . $add1 . '</a> &nbsp;';
+    $centerPages .= '&nbsp; <a href="' . $_SERVER['PHP_SELF'] . '?pn=' . $add1 . '&id='. $id . '&title='. $title . '">' . $add1 . '</a> &nbsp;';
 }
 // This line sets the "LIMIT" range... the 2 values we place to choose a range of rows from database in our query
 $limit = 'LIMIT ' .($pn - 1) * $itemsPerPage .',' .$itemsPerPage;
 // Now we are going to run the same query as above but this time add $limit onto the end of the SQL syntax
 // $sql2 is what we will use to fuel our while loop statement below
 // $sql2 = mysql_query("SELECT id, firstname, country FROM myTable ORDER BY id ASC $limit");
-$sql2 = "select * from Article ORDER BY _id DESC " . $limit ;
+$sql2 = "select * from Article where seasonId = '" . $id . "'" . "ORDER BY _id DESC " . $limit ;
 // echo $sql2 . "<br/>";
 // die("exit");
 //////////////////////////////// END Adam's Pagination Logic ////////////////////////////////////////////////////////////////////////////////
@@ -76,14 +85,14 @@ if ($lastPage != "1"){
     // If we are not on page 1 we can place the Back button
     if ($pn != 1) {
         $previous = $pn - 1;
-        $paginationDisplay .=  '&nbsp;  <a href="' . $_SERVER['PHP_SELF'] . '?pn=' . $previous . '"> Back</a> ';
+        $paginationDisplay .=  '&nbsp;  <a href="' . $_SERVER['PHP_SELF'] . '?pn=' . $previous . '&id='. $id . '&title='. $title . '"> Back</a> ';
     }
     // Lay in the clickable numbers display here between the Back and Next links
     $paginationDisplay .= '<span class="paginationNumbers">' . $centerPages . '</span>';
     // If we are not on the very last page we can place the Next button
     if ($pn != $lastPage) {
         $nextPage = $pn + 1;
-        $paginationDisplay .=  '&nbsp;  <a href="' . $_SERVER['PHP_SELF'] . '?pn=' . $nextPage . '"> Next</a> ';
+        $paginationDisplay .=  '&nbsp;  <a href="' . $_SERVER['PHP_SELF'] . '?pn=' . $nextPage . '&id='. $id . '&title='. $title . '"> Next</a> ';
     }
 }
 ///////////////////////////////////// END Adam's Pagination Display Setup ///////////////////////////////////////////////////////////////////////////
@@ -110,7 +119,7 @@ foreach ($dbh->query($sql2) as $row) {
 ?>
 <html>
 <head>
-<title>和讯网新闻分页</title>
+<title><?php $title ?></title>
 <style type="text/css">
 
 .pagNumActive {
